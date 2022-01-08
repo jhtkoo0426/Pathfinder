@@ -1,0 +1,16 @@
+<!-- This is the base template for every .html file in the project. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pathfinder</title>
+    {% load static %}
+    {% block styles %}
+        <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    {% endblock %}
+</head>
+<body>
+    {% include 'base_pages/navbar.html' %}
+    {% block content %}{% endblock %}
+</body>
+</html>

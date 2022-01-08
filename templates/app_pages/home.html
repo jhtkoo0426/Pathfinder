@@ -1,0 +1,23 @@
+{% extends 'base_pages/base.html' %}
+{% block content %}
+    <h1>Hello World</h1>
+    <p>This is the homepage.</p>
+    <!-- You can pass a CONTEXT dictionary from your view (in views.py) and
+    directly use the keys as variables for the webpage. -->
+    {{ my_text }}, {{ my_num }}
+
+    <!-- Using for loops in a template -->
+    <ul>
+        {% for item in some_list %}
+            <li>{{ forloop.counter }} => {{ item }}</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Using conditions in a template -->
+    {% if my_num == 0.01 %}
+        <li>Yes</li>
+    {% else %}
+        <li>No</li>
+    {% endif %}
+
+{% endblock %}
