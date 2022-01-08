@@ -5,6 +5,16 @@
     scroll-behavior: smooth;
 }
 
-.about-page-title {
-    background-color: yellow;
+@font-face {
+    font-family: 'RobotoMono';
+    src: url("../fonts/RobotoMono-Regular.ttf");
+}
+
+p {
+    font-family: 'RobotoMono', serif;
+}
+
+h1, h3 {
+    padding: 5% 0 10px 0;
+    font-family: 'RobotoMono', serif;
 }
