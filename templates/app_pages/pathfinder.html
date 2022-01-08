@@ -1,15 +1,13 @@
 {% extends 'base_pages/base.html' %}
 {% block content %}
-    <h1>Hello World</h1>
-    <p>This is the homepage.</p>
+    <h1>Pathfinder [0v0]</h1>
     <!-- You can pass a CONTEXT dictionary from your view (in views.py) and
     directly use the keys as variables for the webpage. -->
-    {{ my_text }}, {{ my_num }}
-
+    {{ result }} | {{ distance }}
     <!-- Using for loops in a template -->
     <ul>
-        {% for item in some_list %}
-            <li>{{ forloop.counter }} => {{ item }}</li>
+        {% for item in db %}
+            <li>{{ forloop.counter }} => {{ item.name }} | {{  itemb }}</li>
         {% endfor %}
     </ul>
 
