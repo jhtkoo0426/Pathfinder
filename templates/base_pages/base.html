@@ -7,10 +7,19 @@
     {% load static %}
     {% block styles %}
         <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
     {% endblock %}
 </head>
 <body>
-    {% include 'base_pages/navbar.html' %}
-    {% block content %}{% endblock %}
+    <div class="page-container">
+        {% include 'base_pages/navbar.html' %}
+
+        <!-- Main container that holds the content for the page. -->
+        <div class="main-container">
+            {% block content %}{% endblock %}
+        </div>
+
+        {% include 'base_pages/footer.html' %}
+    </div>
 </body>
 </html>

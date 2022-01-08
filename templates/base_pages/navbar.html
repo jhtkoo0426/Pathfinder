@@ -1,6 +1,15 @@
-<nav>
+{% load static %}
+{% block styles %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+{% endblock %}
+<nav class="navbar">
     <ul>
-        <li><a href="{% url 'home' %}">Pathfinder</a></li>
-        <li><a href="{% url 'about' %}">About Pathfinder</a></li>
+        <li><a href="{% url 'home' %}" id="navbar-home-link">Pathfinder</a></li>
+        <li><a href="{% url 'about' %}" id="navbar-about-link">About Pathfinder</a></li>
+        <li>
+            <a href="https://github.com/jhtkoo0426/Pathfinder" target="_blank">
+                <i class="fab fa-github"></i>
+            </a>
+        </li>
     </ul>
 </nav>
