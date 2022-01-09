@@ -7,3 +7,4 @@ class Station(models.Model):
     lat = models.FloatField()
     lng = models.FloatField()
     tubeLine = models.TextField(max_length=50, default='LINE')
+    adjacencyList = models.JSONField()
