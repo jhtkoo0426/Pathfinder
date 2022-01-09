@@ -15,7 +15,6 @@ def calculateDistance(lt1, lg1, lt2, lg2):
 # Homepage View
 def home_view(request, *args, **kwargs):
     stations = Station.objects.all()
-
     start, end = stations.get(id=152), stations.get(id=516)
     distance = calculateDistance(start.lat, start.lng, end.lat, end.lng)
     results = [start.lat, start.lng, end.lat, end.lng]
