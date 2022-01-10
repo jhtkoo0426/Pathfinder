@@ -1,0 +1,34 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    scroll-behavior: smooth;
+}
+
+@font-face {
+    font-family: 'RobotoMono';
+    src: url("../fonts/RobotoMono-Regular.ttf");
+}
+
+p {
+    font-family: 'RobotoMono', serif;
+}
+
+h1, h3 {
+    padding: 5% 0 10px 0;
+    font-family: 'RobotoMono', serif;
+}
+
+form {
+    font-family: 'RobotoMono', serif;
+}
+
+.search-stations > input {
+    background-color: yellow;
+}
+
+.map-grid, #map-grid {
+    width: 100%;
+    height: 60vh;
+    background-color: yellowgreen;
+}

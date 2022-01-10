@@ -1,5 +1,3 @@
-import json
-
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest
 from django.core import serializers
@@ -7,6 +5,7 @@ from stations.models import Station
 from math import radians, sin, cos, atan2, sqrt
 import utm
 from .forms import SearchStationForm
+from .algorithms import Dijkstra
 
 
 def calculateDistance(lt1, lg1, lt2, lg2):
@@ -23,6 +22,18 @@ def latlngToXY(lat, lng):
     return result[0], result[1]
 
 
+def runDijkstra(vertices, adjList, start, end):
+    dijkstra = Dijkstra(vertices, adjList)
+    parents, visited = dijkstra.find_route(start, end)
+    path = dijkstra.generate_path(parents, start, end)
+    result = []
+    # Change path vertices from id to station names
+    for i in path:
+        station_obj = Station.objects.get(id=i)
+        result.append(station_obj.name)
+    return '->'.join(result)
+
+
 # View to accept the request and return a respons in JSON format.
 def search_view(request):
     form = SearchStationForm(request.POST or None)
@@ -31,21 +42,48 @@ def search_view(request):
         if form.is_valid():
             user_start = form.cleaned_data.get("start_station")
             user_end = form.cleaned_data.get("end_station")
-            found_start = Station.objects.get(name=user_start)
-            found_end = Station.objects.get(name=user_end)
-            distance = calculateDistance(found_start.lat, found_start.lng, found_end.lat, found_end.lng)
 
-            context = {
-                "user_start": user_start,
-                "user_end": user_end,
-                "distance": distance,
-                "form": form,
-                "error": None,
-            }
+            try:
+                found_start = Station.objects.get(name=user_start)
+                found_end = Station.objects.get(name=user_end)
+                distance = calculateDistance(found_start.lat, found_start.lng, found_end.lat, found_end.lng)
+
+                vertices = (i for i in range(len(Station.objects.all())))
+
+                adjList = {}
+                for i in range(1, len(Station.objects.all())):
+                    item = Station.objects.get(id=i)
+                    adj = item.adjacencyList
+                    adjList[i] = adj
+
+                path = runDijkstra(vertices, adjList, found_start.id, found_end.id)
+                print("path: ", path)
+                context = {
+                    "user_start": user_start,
+                    "user_end": user_end,
+                    "distance": distance,
+                    "path": path,
+                    "form": form,
+                    "error": None,
+                    "adj": adjList
+                }
+            except Station.DoesNotExist:
+                context = {
+                    "user_start": user_start,
+                    "user_end": user_end,
+                    "distance": "NaN",
+                    "form": form,
+                    "error": "Invalid station"
+                }
             return render(request, "app_pages/pathfinder.html", context)
     else:
         form = SearchStationForm()
-        return render(request, "app_pages/pathfinder.html", {'form': form})
+        stations = Station.objects.all()
+        context = {
+            "form": form,
+            "stations": stations
+        }
+        return render(request, "app_pages/pathfinder.html", context)
 
 
 # Pathfinder homepage view - used for searching and displaying algorithm results.
