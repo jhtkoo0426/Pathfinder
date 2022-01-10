@@ -26,12 +26,9 @@ def runDijkstra(vertices, adjList, start, end):
     dijkstra = Dijkstra(vertices, adjList)
     parents, visited = dijkstra.find_route(start, end)
     path = dijkstra.generate_path(parents, start, end)
-    result = []
-    # Change path vertices from id to station names
-    for i in path:
-        station_obj = Station.objects.get(id=i)
-        result.append(station_obj.name)
-    return '->'.join(result)
+    id_path = ' -> '.join([str(i) for i in path])
+    name_path = ' -> '.join([(Station.objects.get(id=i)).name for i in path])
+    return id_path, name_path
 
 
 # View to accept the request and return a respons in JSON format.
@@ -56,13 +53,13 @@ def search_view(request):
                     adj = item.adjacencyList
                     adjList[i] = adj
 
-                path = runDijkstra(vertices, adjList, found_start.id, found_end.id)
-                print("path: ", path)
+                id_path, name_path = runDijkstra(vertices, adjList, found_start.id, found_end.id)
                 context = {
                     "user_start": user_start,
                     "user_end": user_end,
                     "distance": distance,
-                    "path": path,
+                    "id_path": id_path,
+                    "name_path": name_path,
                     "form": form,
                     "error": None,
                     "adj": adjList
