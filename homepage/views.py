@@ -1,6 +1,12 @@
+import json
+
 from django.shortcuts import render
+from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest
+from django.core import serializers
 from stations.models import Station
 from math import radians, sin, cos, atan2, sqrt
+import utm
+from .forms import SearchStationForm
 
 
 def calculateDistance(lt1, lg1, lt2, lg2):
@@ -12,18 +18,43 @@ def calculateDistance(lt1, lg1, lt2, lg2):
     return distance
 
 
-# Homepage View
+def latlngToXY(lat, lng):
+    result = utm.from_latlon(lat, lng)      # In the form of (x, y, UTM Zone)
+    return result[0], result[1]
+
+
+# View to accept the request and return a respons in JSON format.
+def search_view(request):
+    form = SearchStationForm(request.POST or None)
+
+    if request.method == "POST":
+        if form.is_valid():
+            user_start = form.cleaned_data.get("start_station")
+            user_end = form.cleaned_data.get("end_station")
+            found_start = Station.objects.get(name=user_start)
+            found_end = Station.objects.get(name=user_end)
+            distance = calculateDistance(found_start.lat, found_start.lng, found_end.lat, found_end.lng)
+
+            context = {
+                "user_start": user_start,
+                "user_end": user_end,
+                "distance": distance,
+                "form": form,
+                "error": None,
+            }
+            return render(request, "app_pages/pathfinder.html", context)
+    else:
+        form = SearchStationForm()
+        return render(request, "app_pages/pathfinder.html", {'form': form})
+
+
+# Pathfinder homepage view - used for searching and displaying algorithm results.
 def home_view(request, *args, **kwargs):
     stations = Station.objects.all()
-    start, end = stations.get(id=152), stations.get(id=516)
-    distance = calculateDistance(start.lat, start.lng, end.lat, end.lng)
-    results = [start.lat, start.lng, end.lat, end.lng]
-
     context = {
         "db": stations,
-        "result": results,
-        "distance": distance
     }
 
     # Return a template "pathfinder.html" instead of an HttpResponse.
     return render(request, "app_pages/pathfinder.html", context)
+

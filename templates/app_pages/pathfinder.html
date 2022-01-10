@@ -3,16 +3,23 @@
     <h1>Pathfinder [0v0]</h1>
     <!-- You can pass a CONTEXT dictionary from your view (in views.py) and
     directly use the keys as variables for the webpage. -->
-    {{ result }} | {{ distance }}
+    <form method="post">
+        {% csrf_token %}
+        {{ form }}
+        <input type="submit" value="Search">
+    </form>
+
+    {{ user_start }} to {{ user_end }}: {{ distance }}
+
     <!-- Using for loops in a template -->
-    <ul>
-        {% for item in db %}
-            <li>{{ forloop.counter }} => {{ item.adjacencyList }}</li>
-            {% for id in item.adjacencyList %}
-                <p>{{ id }}</p>
-            {% endfor %}
-        {% endfor %}
-    </ul>
+{#    <ul>#}
+{#        {% for item in db %}#}
+{#            <li>{{ forloop.counter }} => {{ item.adjacencyList }}</li>#}
+{#            {% for id in item.adjacencyList %}#}
+{#                <p>{{ id }} | [ {{ item.x }}, {{ item.y }} ]</p>#}
+{#            {% endfor %}#}
+{#        {% endfor %}#}
+{#    </ul>#}
 
     <!-- Using conditions in a template -->
     {% if my_num == 0.01 %}
@@ -20,5 +27,4 @@
     {% else %}
         <li>No</li>
     {% endif %}
-
 {% endblock %}

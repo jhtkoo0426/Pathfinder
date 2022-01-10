@@ -15,16 +15,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from homepage.views import home_view
+from homepage.views import *
 from about.views import about_view
 from stations.views import station_detail_view
 
 
 # TODO: Convert the function views to Class-based views
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', home_view, name='home'),
-    # path('home/', home_view, name='home'),
+    # path('search/', search_view, name='search'),
+    path('', search_view, name='home'),
     path('about/', about_view, name='about'),
     path('stations/', station_detail_view, name='stations'),
 ]
