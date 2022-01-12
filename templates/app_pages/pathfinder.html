@@ -4,14 +4,15 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/pathfinder.css' %}">
 {% endblock %}
 {% block content %}
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
     <h1>Pathfinder</h1>
-    <p>Enter start and end stations to find their distance!</p><br>
+    <p>Enter start and end stations to find their distance.</p><br>
     <!-- You can pass a CONTEXT dictionary from your view (in views.py) and
     directly use the keys as variables for the webpage. -->
     <form method="post" class="search-stations">
         {% csrf_token %}
         {{ form }}
-        <input type="submit" value="Search">
+        <input type="submit" value="Visualise">
     </form>
 
     <p>{{ user_start }} => {{ user_end }}:</p>
@@ -25,6 +26,43 @@
 {#            <li>{{ forloop.counter }} ({{ item.name }}) => {{ item.adjacencyList }} | {{ item.x }} | {{ item.y }}</li>#}
 {#        {% endfor %}#}
 {#    </ul>#}
+
+    <div id="map"></div>
+
+    <!-- Async script executes immediately and must be after any DOM elements used in callback. -->
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDbdBjq8tdxsYt-ui9hy_sUXxY8RYOgkxg&callback=initMap&v=weekly"
+      async
+    ></script>
+    <script>
+        let map;
+
+        function initMap() {
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: { lat: 51.5080184, lng: -0.1279401 },
+                zoom: 10,
+            });
+
+            {% for station in stations %}
+                // Create marker for station and plot on google maps.
+                new google.maps.Circle({
+                    strokeColor: "{{ station.lineColor }}",
+                    strokeOpacity: 1,
+                    strokeWeight: 1,
+                    fillColor: "{{ station.lineColor }}",
+                    fillOpacity: 0.35,
+                    map: map,
+                    center: {lat: {{ station.lat }}, lng: {{ station.lng }}},
+                    title: "{{ station.name }}",
+                    radius: map.getZoom() * 10,
+                    label: {
+                        fontsize: "8pt",
+                        text: "{{ station.name }}"
+                    }
+                });
+            {% endfor %}
+        }
+    </script>
 
     <!-- Using conditions in a template -->
 {#    {% if my_num == 0.01 %}#}

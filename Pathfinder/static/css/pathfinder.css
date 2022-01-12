@@ -27,8 +27,6 @@ form {
     background-color: yellow;
 }
 
-.map-grid, #map-grid {
-    width: 100%;
-    height: 60vh;
-    background-color: yellowgreen;
+#map {
+  height: 500px;
 }

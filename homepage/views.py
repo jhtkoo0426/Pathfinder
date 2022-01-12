@@ -31,7 +31,8 @@ def runDijkstra(vertices, adjList, start, end):
     return id_path, name_path
 
 
-# View to accept the request and return a respons in JSON format.
+# Pathfinder search view - used for searching and displaying algorithm results.
+# Accepts the request and return a response in JSON format.
 def search_view(request):
     form = SearchStationForm(request.POST or None)
 
@@ -55,6 +56,7 @@ def search_view(request):
 
                 id_path, name_path = runDijkstra(vertices, adjList, found_start.id, found_end.id)
                 context = {
+                    "stations": Station.objects.all(),
                     "user_start": user_start,
                     "user_end": user_end,
                     "distance": distance,
@@ -62,7 +64,7 @@ def search_view(request):
                     "name_path": name_path,
                     "form": form,
                     "error": None,
-                    "adj": adjList
+                    "adj": adjList,
                 }
             except Station.DoesNotExist:
                 context = {
@@ -81,15 +83,3 @@ def search_view(request):
             "stations": stations
         }
         return render(request, "app_pages/pathfinder.html", context)
-
-
-# Pathfinder homepage view - used for searching and displaying algorithm results.
-def home_view(request, *args, **kwargs):
-    stations = Station.objects.all()
-    context = {
-        "db": stations,
-    }
-
-    # Return a template "pathfinder.html" instead of an HttpResponse.
-    return render(request, "app_pages/pathfinder.html", context)
-
