@@ -23,7 +23,7 @@ def runDijkstra(vertices, adjList, start, end):
     path = dijkstra.generate_path(parents, start, end)
     id_path = ' -> '.join([str(i) for i in path])
     name_path = ' -> '.join([(Station.objects.get(id=i)).name for i in path])
-    return id_path, name_path
+    return id_path, name_path, path
 
 
 # Auxiliary function to check if the stations the user entered exist, and return the station objects
@@ -66,11 +66,12 @@ def getAlgorithmResults(request):
         adj = item.adjacencyList
         adjList[i] = adj
 
-    id_path, name_path = runDijkstra(vertices, adjList, found_start.id, found_end.id)
+    id_path, name_path, raw_path = runDijkstra(vertices, adjList, found_start.id, found_end.id)
     data = {
         'calculated_distance': distance,
         'calculated_id_path': id_path,
         'calculated_name_path': name_path,
+        'calculated_raw_path': raw_path,
         'error_start': error_start,
         'error_end': error_end
     }

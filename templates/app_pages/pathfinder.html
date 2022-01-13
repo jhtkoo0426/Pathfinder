@@ -29,6 +29,28 @@
     <script>
         let map;
         var marker_array = [];
+        var stations = [];
+        var polylines = [];
+        let line;           // For the removeAllPolylines and animateRoute function - to save the polyline as an object.
+
+        // Method to store the station objects into an array.
+        function storeStations() {
+            var id = 0;
+            {% for station in stations %}
+                var properties = {
+                    "id": id,
+                    "name": "{{ station.name }}",
+                    "lat": "{{ station.lat }}",
+                    "lng": "{{ station.lng }}",
+                    "tubeLine": "{{ station.tubeLine }}",
+                    "adj": "{{ station.adjacencyList }}",
+                    "color": "{{ station.lineColor }}"
+                }
+                stations.push(properties);
+                id++;
+            {% endfor %}
+        }
+        storeStations();
 
         function initMap() {
             map = new google.maps.Map(document.getElementById("map"), {
@@ -56,11 +78,74 @@
 
                 marker_array.push(marker);
             {% endfor %}
+
+            // Listener to trigger path-finding algorithm
         }
 
-        function animateRoute() {
-
+        // Method to fetch the properties of a given station ID.
+        function getStationDetails(stationID) {
+            return stations[stationID - 1];
         }
+
+        function addPolyline() {
+            for (let i = 0; i < polylines.length; i++) {
+                polylines[i].setMap(map);
+            }
+        }
+
+        // Remove all polylines before drawing a new one
+        function removeAllPolylines() {
+            for (let i = 0; i < polylines.length; i++) {
+                polylines[i].setMap(null);
+                polylines[i].setVisible(false);
+            }
+            polylines.length = 0;
+            console.log("polylines length: " + polylines.length);
+        }
+
+        function animateRoute(routeList) {
+            console.log("Working");
+            removeAllPolylines();
+            var prev_lat = "";
+            var prev_lng = "";
+            var current_lat = "";
+            var current_lng = "";
+
+            for (let i = 0; i < routeList.length; i++) {
+                var id = routeList[i];
+                var station_properties = getStationDetails(id);
+
+                if (i === 0) {
+                    // Get station details
+                    current_lat = parseFloat(station_properties["lat"]);
+                    current_lng = parseFloat(station_properties["lng"]);
+                    prev_lat = current_lat;
+                    prev_lng = current_lng;
+                } else {
+                    // Get station details
+                    current_lat = parseFloat(station_properties["lat"]);
+                    current_lng = parseFloat(station_properties["lng"]);
+
+                    // Animate
+                    let line = new google.maps.Polyline({
+                        path: [
+                            {lat: prev_lat, lng: prev_lng},
+                            {lat: current_lat, lng: current_lng},
+                        ],
+                        geodesic: true,
+                        strokeColor: "#000000",
+                        strokeOpacity: 1,
+                        strokeWeight: 2,
+                    });
+
+                    polylines.push(line);
+                    prev_lat = current_lat;
+                    prev_lng = current_lng;
+                }
+            }
+            addPolyline();
+        }
+
         // Ajax method to send and receive data (to prevent page reload).
         $("#sender").click(function () {
             var user_start = $('#user-start-stn').val();
@@ -78,6 +163,10 @@
                     document.querySelector('.span_id_path').innerHTML = data["calculated_id_path"];
                     document.querySelector('.span_name_path').innerHTML = data["calculated_name_path"];
                     document.querySelector('.span_error_start').innerHTML = data["error_start"];
+
+                    // Get raw path to animate route.
+                    var raw_path_list = data["calculated_raw_path"];
+                    animateRoute(raw_path_list);
                 }
             });
         });
