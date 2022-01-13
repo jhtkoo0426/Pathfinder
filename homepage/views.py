@@ -17,11 +17,6 @@ def calculateDistance(lt1, lg1, lt2, lg2):
     return distance
 
 
-def latlngToXY(lat, lng):
-    result = utm.from_latlon(lat, lng)      # In the form of (x, y, UTM Zone)
-    return result[0], result[1]
-
-
 def runDijkstra(vertices, adjList, start, end):
     dijkstra = Dijkstra(vertices, adjList)
     parents, visited = dijkstra.find_route(start, end)
@@ -31,68 +26,39 @@ def runDijkstra(vertices, adjList, start, end):
     return id_path, name_path
 
 
-# Pathfinder search view - used for searching and displaying algorithm results.
-# Accepts the request and return a response in JSON format.
-def search_view(request):
-    form = SearchStationForm(request.POST or None)
+# Auxiliary function to check if the stations the user entered exist, and return the station objects
+# and corresponding error messages.
+def checkValid(queried_objects):
+    return_objects = []
+    for i in queried_objects:
+        try:
+            target = Station.objects.get(name=i)
+            return_objects.append(target)
+        except Station.DoesNotExist:
+            return_objects.append(None)
 
-    if request.method == "POST":
-        if form.is_valid():
-            user_start = form.cleaned_data.get("start_station")
-            user_end = form.cleaned_data.get("end_station")
-
-            try:
-                found_start = Station.objects.get(name=user_start)
-                found_end = Station.objects.get(name=user_end)
-                distance = calculateDistance(found_start.lat, found_start.lng, found_end.lat, found_end.lng)
-
-                vertices = (i for i in range(len(Station.objects.all())))
-
-                adjList = {}
-                for i in range(1, len(Station.objects.all())):
-                    item = Station.objects.get(id=i)
-                    adj = item.adjacencyList
-                    adjList[i] = adj
-
-                id_path, name_path = runDijkstra(vertices, adjList, found_start.id, found_end.id)
-                context = {
-                    "stations": Station.objects.all(),
-                    "user_start": user_start,
-                    "user_end": user_end,
-                    "distance": distance,
-                    "id_path": id_path,
-                    "name_path": name_path,
-                    "form": form,
-                    "error": None,
-                    "adj": adjList,
-                }
-            except Station.DoesNotExist:
-                context = {
-                    "user_start": user_start,
-                    "user_end": user_end,
-                    "distance": "NaN",
-                    "form": form,
-                    "error": "Invalid station"
-                }
-            return render(request, "app_pages/pathfinder.html", context)
+    if return_objects[0] is not None:
+        found_start = return_objects[0]
+        error_start = None
     else:
-        form = SearchStationForm()
-        stations = Station.objects.all()
-        context = {
-            "form": form,
-            "stations": stations
-        }
-        return render(request, "app_pages/pathfinder.html", context)
+        found_start = None
+        error_start = f"The station {queried_objects[0]} does not exist."
+    if return_objects[1] is not None:
+        found_end = return_objects[1]
+        error_end = None
+    else:
+        found_end = None
+        error_end = f"The station {queried_objects[1]} does not exist."
+    return found_start, found_end, error_start, error_end
 
 
-def answer_me(request):
+# Ajax function to return the results of executing algorithms.
+def getAlgorithmResults(request):
     user_start = request.GET.get('user_start')
     user_end = request.GET.get('user_end')
+    found_start, found_end, error_start, error_end = checkValid([user_start, user_end])
 
-    found_start = Station.objects.get(name=user_start)
-    found_end = Station.objects.get(name=user_end)
     distance = calculateDistance(found_start.lat, found_start.lng, found_end.lat, found_end.lng)
-
     vertices = (i for i in range(len(Station.objects.all())))
     adjList = {}
     for i in range(1, len(Station.objects.all())):
@@ -105,5 +71,19 @@ def answer_me(request):
         'calculated_distance': distance,
         'calculated_id_path': id_path,
         'calculated_name_path': name_path,
+        'error_start': error_start,
+        'error_end': error_end
     }
     return JsonResponse(data)
+
+
+# Pathfinder search view - used for searching and displaying algorithm results.
+# Accepts the request and return a response in JSON format.
+def search_view(request):
+    form = SearchStationForm()
+    stations = Station.objects.all()
+    context = {
+        "form": form,
+        "stations": stations
+    }
+    return render(request, "app_pages/pathfinder.html", context)

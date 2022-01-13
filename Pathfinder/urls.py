@@ -26,5 +26,5 @@ urlpatterns = [
     path('', search_view, name='home'),
     path('about/', about_view, name='about'),
     path('stations/', station_detail_view, name='stations'),
-    path(r'^ajax/get_response/$', answer_me, name='get_response')
+    path(r'^ajax/get_response/$', getAlgorithmResults, name='get_response')
 ]

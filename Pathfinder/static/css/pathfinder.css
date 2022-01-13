@@ -19,12 +19,8 @@ h1, h3 {
     font-family: 'RobotoMono', serif;
 }
 
-form {
+label, input {
     font-family: 'RobotoMono', serif;
-}
-
-.search-stations > input {
-    background-color: yellow;
 }
 
 #map {

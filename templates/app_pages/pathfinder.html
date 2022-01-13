@@ -7,32 +7,18 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
     <h1>Pathfinder</h1>
     <p>Enter start and end stations to find their distance.</p><br>
-    <!-- You can pass a CONTEXT dictionary from your view (in views.py) and
-    directly use the keys as variables for the webpage. -->
-{#    <form method="post" class="search-stations">#}
-{#        {% csrf_token %}#}
-{#        {{ form }}#}
-{#        <input type="submit" value="Visualise" id="submit-btn">#}
-{#    </form>#}
-    <label for="user-start-stn">Your starting station: </label>
-    <input type="text" id="user-start-stn" autofocus="">
-    <label for="user-end-stn">Your destination: </label>
-    <input type="text" id="user-end-stn" autofocus="">
-    <button type="button" id="sender">Send data</button><br>
-    <p id="p-text">foo bar</p>
 
-    <p>{{ user_start }} => {{ user_end }}:</p>
+    <!-- Form to ask user for starting and ending stations -->
+    <label for="user-start-stn">Your starting station: <span class="span_error_start"></span></label>
+    <input type="text" id="user-start-stn" autofocus=""><br>
+    <label for="user-end-stn">Your destination: <span class="span_error_end"></span></label>
+    <input type="text" id="user-end-stn" autofocus=""><br><br>
+    <button type="button" id="sender">Send data</button><br>
+
+    <!-- Display algorithm results -->
     <p>Distance = <span class="span_distance"></span></p>
     <p>ID Path: <span class="span_id_path"></span></p>
     <p>Name Path: <span class="span_name_path"></span></p>
-
-    <!-- Using for loops in a template -->
-{#    <ul>#}
-{#        {% for item in stations %}#}
-{#            <li>{{ forloop.counter }} ({{ item.name }}) => {{ item.adjacencyList }} | {{ item.x }} | {{ item.y }}</li>#}
-{#        {% endfor %}#}
-{#    </ul>#}
-
     <div id="map"></div>
 
     <!-- Async script executes immediately and must be after any DOM elements used in callback. -->
@@ -42,6 +28,7 @@
     ></script>
     <script>
         let map;
+        var marker_array = [];
 
         function initMap() {
             map = new google.maps.Map(document.getElementById("map"), {
@@ -51,7 +38,7 @@
 
             {% for station in stations %}
                 // Create marker for station and plot on google maps.
-                new google.maps.Circle({
+                var marker = new google.maps.Circle({
                     strokeColor: "{{ station.lineColor }}",
                     strokeOpacity: 1,
                     strokeWeight: 1,
@@ -66,8 +53,15 @@
                         text: "{{ station.name }}"
                     }
                 });
+
+                marker_array.push(marker);
             {% endfor %}
         }
+
+        function animateRoute() {
+
+        }
+        // Ajax method to send and receive data (to prevent page reload).
         $("#sender").click(function () {
             var user_start = $('#user-start-stn').val();
             var user_end = $('#user-end-stn').val();
@@ -83,6 +77,7 @@
                     document.querySelector('.span_distance').innerHTML = data["calculated_distance"];
                     document.querySelector('.span_id_path').innerHTML = data["calculated_id_path"];
                     document.querySelector('.span_name_path').innerHTML = data["calculated_name_path"];
+                    document.querySelector('.span_error_start').innerHTML = data["error_start"];
                 }
             });
         });
