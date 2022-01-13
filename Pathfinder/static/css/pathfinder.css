@@ -23,6 +23,18 @@ label, input {
     font-family: 'RobotoMono', serif;
 }
 
+#sender {
+    border: 1px solid black;
+    border-radius: 5px;
+    background-color: transparent;
+    padding: 5px;
+}
+
+#sender:hover {
+    cursor: pointer;
+    transform: translateY(1px);
+}
+
 #map {
-  height: 500px;
+    height: 50vh;
 }

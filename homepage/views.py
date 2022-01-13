@@ -1,9 +1,7 @@
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest
-from django.core import serializers
+from django.http import JsonResponse
 from stations.models import Station
 from math import radians, sin, cos, atan2, sqrt
-import utm
 from .forms import SearchStationForm
 from .algorithms import Dijkstra
 
@@ -21,9 +19,8 @@ def runDijkstra(vertices, adjList, start, end):
     dijkstra = Dijkstra(vertices, adjList)
     parents, visited = dijkstra.find_route(start, end)
     path = dijkstra.generate_path(parents, start, end)
-    id_path = ' -> '.join([str(i) for i in path])
     name_path = ' -> '.join([(Station.objects.get(id=i)).name for i in path])
-    return id_path, name_path, path
+    return name_path, path
 
 
 # Auxiliary function to check if the stations the user entered exist, and return the station objects
@@ -57,25 +54,33 @@ def getAlgorithmResults(request):
     user_start = request.GET.get('user_start')
     user_end = request.GET.get('user_end')
     found_start, found_end, error_start, error_end = checkValid([user_start, user_end])
+    if found_start is None or found_end is None:
+        data = {
+            'calculated_distance': None,
+            'calculated_name_path': None,
+            'calculated_raw_path': None,
+            'error_start': error_start,
+            'error_end': error_end
+        }
+        return JsonResponse(data)
+    else:
+        distance = calculateDistance(found_start.lat, found_start.lng, found_end.lat, found_end.lng)
+        vertices = (i for i in range(len(Station.objects.all())))
+        adjList = {}
+        for i in range(1, len(Station.objects.all())):
+            item = Station.objects.get(id=i)
+            adj = item.adjacencyList
+            adjList[i] = adj
 
-    distance = calculateDistance(found_start.lat, found_start.lng, found_end.lat, found_end.lng)
-    vertices = (i for i in range(len(Station.objects.all())))
-    adjList = {}
-    for i in range(1, len(Station.objects.all())):
-        item = Station.objects.get(id=i)
-        adj = item.adjacencyList
-        adjList[i] = adj
-
-    id_path, name_path, raw_path = runDijkstra(vertices, adjList, found_start.id, found_end.id)
-    data = {
-        'calculated_distance': distance,
-        'calculated_id_path': id_path,
-        'calculated_name_path': name_path,
-        'calculated_raw_path': raw_path,
-        'error_start': error_start,
-        'error_end': error_end
-    }
-    return JsonResponse(data)
+        name_path, raw_path = runDijkstra(vertices, adjList, found_start.id, found_end.id)
+        data = {
+            'calculated_distance': distance,
+            'calculated_name_path': name_path,
+            'calculated_raw_path': raw_path,
+            'error_start': error_start,
+            'error_end': error_end
+        }
+        return JsonResponse(data)
 
 
 # Pathfinder search view - used for searching and displaying algorithm results.
