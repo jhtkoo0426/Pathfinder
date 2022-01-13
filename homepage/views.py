@@ -83,3 +83,27 @@ def search_view(request):
             "stations": stations
         }
         return render(request, "app_pages/pathfinder.html", context)
+
+
+def answer_me(request):
+    user_start = request.GET.get('user_start')
+    user_end = request.GET.get('user_end')
+
+    found_start = Station.objects.get(name=user_start)
+    found_end = Station.objects.get(name=user_end)
+    distance = calculateDistance(found_start.lat, found_start.lng, found_end.lat, found_end.lng)
+
+    vertices = (i for i in range(len(Station.objects.all())))
+    adjList = {}
+    for i in range(1, len(Station.objects.all())):
+        item = Station.objects.get(id=i)
+        adj = item.adjacencyList
+        adjList[i] = adj
+
+    id_path, name_path = runDijkstra(vertices, adjList, found_start.id, found_end.id)
+    data = {
+        'calculated_distance': distance,
+        'calculated_id_path': id_path,
+        'calculated_name_path': name_path,
+    }
+    return JsonResponse(data)

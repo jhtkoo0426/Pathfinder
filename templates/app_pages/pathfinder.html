@@ -9,16 +9,22 @@
     <p>Enter start and end stations to find their distance.</p><br>
     <!-- You can pass a CONTEXT dictionary from your view (in views.py) and
     directly use the keys as variables for the webpage. -->
-    <form method="post" class="search-stations">
-        {% csrf_token %}
-        {{ form }}
-        <input type="submit" value="Visualise">
-    </form>
+{#    <form method="post" class="search-stations">#}
+{#        {% csrf_token %}#}
+{#        {{ form }}#}
+{#        <input type="submit" value="Visualise" id="submit-btn">#}
+{#    </form>#}
+    <label for="user-start-stn">Your starting station: </label>
+    <input type="text" id="user-start-stn" autofocus="">
+    <label for="user-end-stn">Your destination: </label>
+    <input type="text" id="user-end-stn" autofocus="">
+    <button type="button" id="sender">Send data</button><br>
+    <p id="p-text">foo bar</p>
 
     <p>{{ user_start }} => {{ user_end }}:</p>
-    <p>Distance = {{ distance }} km</p>
-    <p>ID Path: <br>{{ id_path }}</p>
-    <p>Name Path: <br> {{ name_path }}</p>
+    <p>Distance = <span class="span_distance"></span></p>
+    <p>ID Path: <span class="span_id_path"></span></p>
+    <p>Name Path: <span class="span_name_path"></span></p>
 
     <!-- Using for loops in a template -->
 {#    <ul>#}
@@ -62,6 +68,24 @@
                 });
             {% endfor %}
         }
+        $("#sender").click(function () {
+            var user_start = $('#user-start-stn').val();
+            var user_end = $('#user-end-stn').val();
+
+            $.ajax({
+                url: '{% url 'get_response' %}',
+                data: {
+                    'user_start': user_start,
+                    'user_end': user_end
+                },
+                dataType: 'json',
+                success: function (data) {
+                    document.querySelector('.span_distance').innerHTML = data["calculated_distance"];
+                    document.querySelector('.span_id_path').innerHTML = data["calculated_id_path"];
+                    document.querySelector('.span_name_path').innerHTML = data["calculated_name_path"];
+                }
+            });
+        });
     </script>
 
     <!-- Using conditions in a template -->
