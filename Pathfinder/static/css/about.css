@@ -10,8 +10,16 @@
     src: url("../fonts/RobotoMono-Regular.ttf");
 }
 
-p {
+p, ul, li {
     font-family: 'RobotoMono', serif;
+}
+
+ul {
+    padding-left: 0;
+}
+
+li {
+    margin-left: 40px;
 }
 
 h1, h3 {
