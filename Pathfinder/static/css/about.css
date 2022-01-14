@@ -10,7 +10,12 @@
     src: url("../fonts/RobotoMono-Regular.ttf");
 }
 
+.about-container {
+    padding: 20px 10% 20px 10%;
+}
+
 p, ul, li {
+    font-size: calc(10px + 0.5vw);
     font-family: 'RobotoMono', serif;
 }
 
@@ -18,11 +23,18 @@ ul {
     padding-left: 0;
 }
 
-li {
+.about-features > li {
     margin-left: 40px;
 }
 
-h1, h3 {
+h1 {
     padding: 5% 0 10px 0;
+    font-size: 40px;
+    font-family: 'RobotoMono', serif;
+}
+
+h3 {
+    padding: 5% 0 10px 0;
+    font-size: 25px;
     font-family: 'RobotoMono', serif;
 }
